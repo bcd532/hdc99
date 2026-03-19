@@ -6,6 +6,7 @@
  * High-dimensional vector operations for encoding and comparing data.
  */
 
+#define HDC_VERSION           "0.1.3"
 #define HDC_MAX_DIMENSION     10048
 #define MAX_CLASSES           128
 
