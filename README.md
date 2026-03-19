@@ -29,7 +29,8 @@ hyperdimensional computing represents data as high-dimensional vectors (thousand
 | function | what it does |
 |---|---|
 | `ngram` | encode a sequence into a fingerprint that captures patterns and order |
-| `level_encode` | encode a continuous value (0.0-1.0) into an hdc vector for sensor data |
+| `level_encode` | encode a continuous value (0.0-1.0) into an hdc vector |
+| `id_level_encode` | encode multiple sensor channels into one vector with channel identity |
 
 ### classification
 
@@ -63,7 +64,7 @@ int main(void)
 ## compile
 
 ```
-gcc -o example examples/example.c hdc.c -lm
+gcc -I. -o example examples/example.c hdc.c -lm
 ```
 
 ## license
