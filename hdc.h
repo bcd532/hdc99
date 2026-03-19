@@ -134,4 +134,16 @@ void neg_vector(float *vector, int dimension);
  */
 void level_encode(float value, float *result, int dimension);
 
+/**
+ * Encode multiple sensor channels into one HDC vector.
+ * Level-encodes each value and binds it with its channel ID.
+ * @param values          array of sensor readings (0.0 to 1.0)
+ * @param id_vectors      array of pointers to channel ID vectors
+ * @param channel_amount  number of sensor channels
+ * @param result_vector   output vector
+ * @param dimension       number of elements in each vector
+ */
+void id_level_encode(float *values, float **id_vectors, int channel_amount, float *result_vector, int dimension);
+
+
 #endif

@@ -202,4 +202,20 @@ void level_encode(float value, float *result, int dimension)
     }
 }
 
+/* Encode multiple sensor channels into one HDC vector */
+void id_level_encode(float *values, float **id_vectors, int channel_amount, float *result_vector, int dimension)
+{
+    float temp_vector[HDC_MAX_DIMENSION];
+    float temp_vector2[HDC_MAX_DIMENSION];
+    zero_vector(result_vector, dimension);
+    for (int i = 0; i < channel_amount; i++)
+    {
+    level_encode(values[i], temp_vector, dimension);
+    bind(temp_vector2, temp_vector, id_vectors[i], dimension);
+    for (int j = 0; j < dimension; j++)
+    {
+        result_vector[j] += temp_vector2[j];
+    }
+    }
+}
 
