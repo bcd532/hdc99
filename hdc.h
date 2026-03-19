@@ -6,7 +6,17 @@
  * High-dimensional vector operations for encoding and comparing data.
  */
 
-#define HDC_MAX_DIMENSION 10048
+#define HDC_MAX_DIMENSION     10048
+#define MAX_CLASSES           128
+
+
+struct hdc_classifier{
+    int dimension;
+    float vector[MAX_CLASSES][HDC_MAX_DIMENSION];
+    int class_count;
+};
+
+int check_max(int dimension);
 
 /**
  * Fill a vector with random bipolar values (-1.0 or 1.0).
@@ -79,5 +89,49 @@ void zero_vector(float *vector, int dimension);
  * @param dimension  number of elements in each vector
  */
 void copy_vector(float *dest, float *src, int dimension);
+
+/**
+ * Train a classifier by adding a vector to a class prototype.
+ * Call multiple times per class to build a stronger prototype.
+ * @param clf       pointer to the classifier
+ * @param vector    training example vector
+ * @param classnum  which class this example belongs to
+ */
+void train(struct hdc_classifier *clf, float *vector, int classnum);
+
+/**
+ * Classify a vector by finding the most similar class prototype.
+ * @param clf         pointer to the classifier
+ * @param new_vector  vector to classify
+ * @return            class number of the best match
+ */
+int classify(struct hdc_classifier *clf, float *new_vector);
+
+/**
+ * Encode a sequence of symbol vectors into an ngram fingerprint.
+ * Captures pattern and order information via sliding window.
+ * @param vectors        array of pointers to symbol vectors
+ * @param symbol_count   number of symbols in the sequence
+ * @param window_size    ngram window size (e.g. 3 for trigrams)
+ * @param result_vector  output vector
+ * @param dimension      number of elements in each vector
+ */
+void ngram(float **vectors, int symbol_count, int window_size, float *result_vector, int dimension);
+
+/**
+ * Fill a vector with all -1.0 values.
+ * @param vector     vector to fill
+ * @param dimension  number of elements in the vector
+ */
+void neg_vector(float *vector, int dimension);
+
+/**
+ * Encode a continuous value (0.0 to 1.0) into an HDC vector.
+ * Nearby values produce similar vectors, distant values produce orthogonal ones.
+ * @param value      input value between 0.0 and 1.0
+ * @param result     output vector
+ * @param dimension  number of elements in the vector
+ */
+void level_encode(float value, float *result, int dimension);
 
 #endif
