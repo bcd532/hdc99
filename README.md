@@ -1,45 +1,42 @@
 # hdc99
 
-standalone hyperdimensional computing framework in c. two files, zero dependencies.
+standalone hyperdimensional computing library in c99. two files, zero dependencies, runs anywhere.
 
-drop `hdc.h` and `hdc.c` into your project and you have on-device pattern recognition.
+drop `hdc.h` and `hdc.c` into your project. that's it.
 
-## what is hdc?
+## what is this
 
-hyperdimensional computing represents data as high-dimensional vectors (thousands of elements) and manipulates them with simple math. random vectors in high dimensions are nearly orthogonal, so each one is naturally distinct. you combine them with a few basic operations to encode structure, relationships, and order.
+hdc encodes data into high-dimensional vectors and classifies by similarity. no training loop, no backpropagation, no gpu. works on microcontrollers, laptops, bare metal, whatever.
 
-## operations
+tested on real datasets:
+- **wine** (13 features, 3 classes): 100% accuracy
+- **iris** (4 features, 3 classes): 93-100% accuracy
+- **ionosphere** (34 features, 2 classes): 90-93% accuracy
 
-### primitives
+all under 5ms total (train + classify). comparable to SVM accuracy at a fraction of the compute.
 
-| function | what it does |
-|---|---|
-| `random_bipolar` | generate a random vector of -1.0 and 1.0 values |
-| `bind` | element-wise multiply — encodes relationships, reversible |
-| `bundle` | element-wise add — combines multiple vectors, like a vote |
-| `normalize` | scale to unit length so similarity comparisons are fair |
-| `similize` | cosine similarity — returns how similar two vectors are (-1 to 1) |
-| `permute` | shift elements with wraparound — encodes position/order |
-| `zero_vector` | fill a vector with zeros |
-| `neg_vector` | fill a vector with -1.0 values |
-| `copy_vector` | copy one vector into another |
+## what you get
 
-### encoding
+**primitives** - the core hdc algebra
+- `bind` - element-wise multiply, encodes relationships, reversible
+- `bundle` - element-wise add, combines vectors like a vote
+- `permute` - circular shift, encodes position and order
+- `normalize` - scale to unit length for fair comparisons
+- `similize` - cosine similarity between two vectors
+- `random_bipolar` - generate random vectors of -1 and 1
 
-| function | what it does |
-|---|---|
-| `ngram` | encode a sequence into a fingerprint that captures patterns and order |
-| `level_encode` | encode a continuous value (0.0-1.0) into an hdc vector |
-| `id_level_encode` | encode multiple sensor channels into one vector with channel identity |
+**encoding** - turn real data into vectors
+- `level_encode` - continuous value (0.0-1.0) to vector, randomized flip order for zero bias
+- `id_level_encode` - multi-channel sensor data to one vector with channel identity
+- `ngram` - sequence fingerprinting for pattern and order capture
 
-### classification
+**classification** - train and predict
+- `train` - add examples to class prototypes
+- `classify` - find the most similar class, returns -1 if nothing trained
 
-| function | what it does |
-|---|---|
-| `train` | add a training example to a class prototype |
-| `classify` | find the most similar class for a new vector |
+**helpers** - `zero_vector`, `neg_vector`, `copy_vector`, `shuffle`
 
-## usage
+## quick start
 
 ```c
 #include "hdc.h"
@@ -48,8 +45,9 @@ hyperdimensional computing represents data as high-dimensional vectors (thousand
 
 int main(void)
 {
-    float a[DIM], b[DIM], result[DIM];
+    hdc_init(42);  // always call this first
 
+    float a[DIM], b[DIM], result[DIM];
     random_bipolar(a, DIM);
     random_bipolar(b, DIM);
 
@@ -57,15 +55,32 @@ int main(void)
 
     float sim;
     similize(&sim, a, b, DIM);
-    // sim ~ 0.0 (random vectors are nearly orthogonal)
+    // sim is near 0.0 - random vectors are nearly orthogonal
 }
 ```
 
 ## compile
 
 ```
-gcc -I. -o example examples/example.c hdc.c -lm
+gcc -std=c99 -I. -o app your_file.c hdc.c -lm
 ```
+
+## warnings
+
+- **call `hdc_init()` before anything else.** level_encode uses a randomized internal table that gets built during init. skip it and you get worse encoding with no error.
+- **the classifier struct is ~5MB.** declare it `static` or global, never as a local variable inside a function. stack overflow otherwise.
+  ```c
+  static struct hdc_classifier clf;
+  hdc_classifier_init(&clf, 4096);
+  ```
+- **all functions do NULL and bounds checking.** you'll get a printed warning instead of a segfault if you pass bad pointers or invalid dimensions.
+- **max dimension is 10048.** configurable via `HDC_MAX_DIMENSION` in the header.
+
+## what's next
+
+- binary hdc (xor bind, hamming distance, bit-packed vectors - way faster, way less memory)
+- circular convolution binding for richer cross-feature encoding
+- online/adaptive classifier that corrects itself during inference
 
 ## license
 

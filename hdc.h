@@ -9,7 +9,7 @@
  * compile: gcc -std=c99 -I. -o app your_file.c hdc.c -lm
  */
 
-#define HDC_VERSION        "0.1.3"
+#define HDC_VERSION        "0.2.0"
 #define HDC_MAX_DIMENSION  10048
 #define MAX_CLASSES        128
 
@@ -49,11 +49,26 @@ void hdc_classifier_init(struct hdc_classifier *clf, int dimension);
  * @param dimension  dimension to validate
  * @return           1 if bad, 0 if ok
  */
-int check_max(int dimension);
+int check_dimension(int dimension);
+
+/**
+ * Returns 1 if any pointer in the array is NULL.
+ * Prints a warning with the function name and argument index.
+ * @param ptrs       array of pointers to check
+ * @param count      number of pointers in the array
+ * @param func_name  name of the calling function (for the warning)
+ * @return           1 if any is NULL, 0 if all ok
+ */
+int check_null(const void **ptrs, int count, const char *func_name);
 
 /* ── core operations ───────────────────────────────────────────── */
 
+/* Broken as of 9:16am 03-22-2026 (made accuracy worse on iris, ionosphere, and wine benchmarks)
+ * will be saving for later to see if improvements can be made!
+
 void feature_pair_encode(float *values, float **id_vectors, int feature_count, float *result, int dimension);
+*/
+
 
 /**
  * Fill a vector with random bipolar values (-1.0 or 1.0).
@@ -94,7 +109,7 @@ void normalize(float *target_vector, int dimension);
 
 /**
  * Compute cosine similarity between two vectors.
- * Makes internal copies — does NOT modify the originals.
+ * Makes internal copies - does NOT modify the originals.
  * Result: 1.0 = identical, 0.0 = unrelated, -1.0 = opposite.
  * @param similar_vector  pointer to store the result
  * @param vector_a        first input vector
@@ -176,6 +191,13 @@ int classify(struct hdc_classifier *clf, float *new_vector);
  * @param dimension  number of elements in the vector
  */
 void zero_vector(float *vector, int dimension);
+
+/**
+ * Fisher-Yates shuffle for int arrays.
+ * @param array       array to shuffle in place
+ * @param shuffle_amt number of elements in the array
+ */
+void shuffle(int *array, int shuffle_amt);
 
 /**
  * Fill a vector with all -1.0 values.
