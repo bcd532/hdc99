@@ -4,7 +4,7 @@ standalone hyperdimensional computing library in c99. zero dependencies, runs an
 
 float vectors and binary (bit-packed) vectors. fft-based circular convolution. drop-in ready.
 
-## what is this
+## What is this?
 
 hdc encodes data into high-dimensional vectors and classifies by similarity. no training loop, no backpropagation, no gpu. works on microcontrollers, laptops, bare metal, whatever.
 
@@ -16,9 +16,9 @@ benchmarked on UCI wine dataset (13 features, 3 classes):
 
 see `examples/wine_benchmark.c` to run it yourself.
 
-## what you get
+## What you get
 
-### float (hdc.h + hdc.c)
+### Float (hdc.h + hdc.c)
 
 **primitives**
 - `bind` - element-wise multiply, encodes relationships, reversible
@@ -47,7 +47,7 @@ see `examples/wine_benchmark.c` to run it yourself.
 
 **helpers** - `zero_vector`, `neg_vector`, `copy_vector`, `shuffle`, `check_null`, `check_dimension`
 
-### binary (hdc_binary.h + hdc_binary.c)
+### Binary (hdc_binary.h + hdc_binary.c)
 
 bit-packed vectors in `uint64_t` arrays. 64 dimensions per word. way faster, way less memory.
 
@@ -60,7 +60,7 @@ bit-packed vectors in `uint64_t` arrays. 64 dimensions per word. way faster, way
 - `id_level_encode_binary` - multi-channel sensor encoding
 - `train_binary` / `classify_binary` - accumulator-based classifier with majority vote thresholding
 
-## quick start
+## Quick start
 
 ```c
 #include "hdc.h"
@@ -83,7 +83,7 @@ int main(void)
 }
 ```
 
-## compile
+## Compile
 
 ```
 gcc -std=c99 -I. -o app your_file.c hdc.c -lm
@@ -94,14 +94,14 @@ for binary hdc:
 gcc -std=c99 -I. -o app your_file.c hdc.c hdc_binary.c -lm
 ```
 
-## run the benchmark
+## Run the benchmark
 
 ```
 gcc -std=c99 -O2 -I. -o wine_benchmark examples/wine_benchmark.c hdc.c -lm
 ./wine_benchmark
 ```
 
-## warnings
+## Warnings
 
 - **call `hdc_init()` before anything else.** level_encode uses a randomized internal table that gets built during init. skip it and you get biased encoding with no error.
 - **classifier structs are large.** float is ~5MB, binary is ~5MB (accumulators). declare them `static` or global, never as a local variable inside a function.
@@ -114,6 +114,6 @@ gcc -std=c99 -O2 -I. -o wine_benchmark examples/wine_benchmark.c hdc.c -lm
 - **circular_convolve requires power-of-2 dimensions** (512, 1024, 2048, 4096, etc) for the fft.
 - **binary hdc dimensions must be multiples of 64** since vectors are packed into uint64_t words.
 
-## license
+## License
 
 mit
