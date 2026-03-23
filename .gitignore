@@ -3,6 +3,7 @@
 app
 example
 hdc
+.clang.d
 docs/
 *.md
 !README.md

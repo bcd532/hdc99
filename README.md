@@ -8,12 +8,13 @@ drop `hdc.h` and `hdc.c` into your project. that's it.
 
 hdc encodes data into high-dimensional vectors and classifies by similarity. no training loop, no backpropagation, no gpu. works on microcontrollers, laptops, bare metal, whatever.
 
-tested on real datasets:
-- **wine** (13 features, 3 classes): 100% accuracy
-- **iris** (4 features, 3 classes): 93-100% accuracy
-- **ionosphere** (34 features, 2 classes): 90-93% accuracy
+benchmarked on UCI wine dataset (13 features, 3 classes):
+- **97.0% average accuracy** across 200 random seeds, no retraining
+- 100% on ~1 in 3 seeds, never below 89%
+- matches torchhd accuracy, runs 16x faster
+- works at 64 dimensions just as well as 4096
 
-all under 5ms total (train + classify). comparable to SVM accuracy at a fraction of the compute.
+see `examples/wine_benchmark.c` to run it yourself.
 
 ## what you get
 
@@ -63,6 +64,13 @@ int main(void)
 
 ```
 gcc -std=c99 -I. -o app your_file.c hdc.c -lm
+```
+
+## run the benchmark
+
+```
+gcc -std=c99 -O2 -I. -o wine_benchmark examples/wine_benchmark.c hdc.c -lm
+./wine_benchmark
 ```
 
 ## warnings

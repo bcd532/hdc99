@@ -9,7 +9,7 @@
  * compile: gcc -std=c99 -I. -o app your_file.c hdc.c -lm
  */
 
-#define HDC_VERSION        "0.2.0"
+#define HDC_VERSION        "0.2.1"
 #define HDC_MAX_DIMENSION  10048
 #define MAX_CLASSES        128
 
