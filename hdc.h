@@ -27,6 +27,11 @@ struct hdc_classifier {
     int class_count;
 };
 
+struct complex_number{
+   float real;
+  float imag;
+};
+
 /* ── setup ─────────────────────────────────────────────────────── */
 
 /**
@@ -213,5 +218,20 @@ void neg_vector(float *vector, int dimension);
  * @param dimension  number of elements in each vector
  */
 void copy_vector(float *dest, float *src, int dimension);
+
+struct complex_number complex_multiply(struct complex_number a, struct complex_number b);
+
+void rearrange_complex(struct complex_number *cmplx, int dimension);
+
+void fft(struct complex_number *cmplx, int dimension);
+void inverse_fft(struct complex_number *cmplx, int dimension);
+int bit_reverse(int index, int num_bits);
+void circular_convolve(float *result, float *vectora, float *vectorb, int dimension);
+void complex_to_vector(float *output_vector, struct complex_number *input, int dimension);
+
+
+void vector_to_complex(float *vector, struct complex_number *output, int dimension);
+
+
 
 #endif

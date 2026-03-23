@@ -359,3 +359,123 @@ int classify(struct hdc_classifier *clf, float *new_vector)
     }
     return bestclass;
 }
+
+void vector_to_complex(float *vector, struct complex_number *output, int dimension){
+    for (int i = 0; i < dimension; i++){
+        output[i].real = vector[i];
+        output[i].imag = 0.0f;
+    }
+}
+
+int bit_reverse(int index, int num_bits){
+    int result = 0;
+    for (int i = 0; i < num_bits; i++){
+        result <<= 1;
+        result |= (index & 1);
+        index >>= 1;
+    }
+    return result;
+}
+
+void circular_convolve(float *result, float *vectora, float *vectorb, int dimension){
+    struct complex_number inputa[dimension];
+    struct complex_number inputb[dimension];
+    struct complex_number result_cmplx[dimension];
+
+    vector_to_complex(vectora, inputa, dimension);
+    vector_to_complex(vectorb, inputb, dimension);
+
+    rearrange_complex(inputa, dimension);
+    rearrange_complex(inputb, dimension);
+
+    fft(inputa, dimension);
+    fft(inputb, dimension);
+
+    for (int i = 0; i < dimension; i++){
+        result_cmplx[i] = complex_multiply(inputa[i], inputb[i]);
+    }
+    rearrange_complex(result_cmplx, dimension);
+    inverse_fft(result_cmplx, dimension);
+    complex_to_vector(result, result_cmplx, dimension);
+
+}
+
+void inverse_fft(struct complex_number *cmplx, int dimension){
+    for (int size = 2; size <= dimension; size *= 2){
+        for (int i = 0; i < dimension; i += size){
+            for (int j = 0; j < size /2; j++){
+                float angle = +2.0f * 3.14159265f * j /size;
+                struct complex_number twiddle;
+                twiddle.real = cosf(angle);
+                twiddle.imag = sinf(angle);
+
+                struct complex_number top = cmplx[i + j];
+                struct complex_number t = complex_multiply(twiddle, cmplx[i + j  + size /2]);
+
+                cmplx[i + j].real = top.real + t.real;
+                cmplx[i +j].imag = top.imag + t.imag;
+
+                cmplx[i + j + size/2].real = top.real - t.real;
+                cmplx[i + j + size/2].imag= top.imag - t.imag;
+
+            }
+        }
+    }
+    for (int i = 0; i < dimension; i++){
+        cmplx[i].real /= dimension;
+        cmplx[i].imag /= dimension;
+    }
+}
+
+void fft(struct complex_number *cmplx, int dimension){
+    for (int size = 2; size <= dimension; size *= 2){
+        for (int i = 0; i < dimension; i += size){
+            for (int j = 0; j < size /2; j++){
+                float angle = -2.0f * 3.14159265f * j /size;
+                struct complex_number twiddle;
+                twiddle.real = cosf(angle);
+                twiddle.imag = sinf(angle);
+
+                struct complex_number top = cmplx[i + j];
+                struct complex_number t = complex_multiply(twiddle, cmplx[i + j  + size /2]);
+
+                cmplx[i + j].real = top.real + t.real;
+                cmplx[i +j].imag = top.imag + t.imag;
+
+                cmplx[i + j + size/2].real = top.real - t.real;
+                cmplx[i + j + size/2].imag= top.imag - t.imag;
+
+            }
+        }
+    }
+}
+
+void rearrange_complex(struct complex_number *cmplx, int dimension ){
+    int num_bits = 0;
+    int temp = dimension;
+    while (temp > 1){
+        temp /= 2;
+        num_bits++;
+    }
+    for (int i = 0; i < dimension; i++){
+        int rev = bit_reverse(i, num_bits);
+        if (rev > i){
+            struct complex_number temp_s = cmplx[i];
+            cmplx[i] = cmplx[rev];
+            cmplx[rev] = temp_s;
+        }
+    }
+}
+
+void complex_to_vector(float *output_vector, struct complex_number *input, int dimension){
+    for (int i = 0; i < dimension; i++){
+        output_vector[i] = input[i].real;
+    }
+}
+
+struct complex_number complex_multiply(struct complex_number a, struct complex_number b){
+    struct complex_number result;
+    result.real = (a.real * b.real) - (a.imag * b.imag);
+    result.imag = (a.real * b.imag) + (a.imag * b.real);
+    return result;
+}
