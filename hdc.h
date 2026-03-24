@@ -188,6 +188,7 @@ void train(struct hdc_classifier *clf, float *vector, int classnum);
  */
 int classify(struct hdc_classifier *clf, float *new_vector);
 
+
 /* ── helpers ───────────────────────────────────────────────────── */
 
 /**

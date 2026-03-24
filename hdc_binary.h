@@ -27,7 +27,7 @@ void shuffle_binary(int *array, int shuffle_amount);
 int classify_binary(struct hdc_binary_classifier *clf, uint64_t *vector);
 void train_binary(struct hdc_binary_classifier *clf, uint64_t *vector, int classnum);
 void hdc_classifier_init_binary(struct hdc_binary_classifier *clf, int dimension);
-
+void build_prototypes_binary(struct hdc_binary_classifier *clf);
 void random_binary(uint64_t *vector, int dimension);
 void bind_binary(uint64_t *result_vector, uint64_t *vectora, uint64_t *vectorb, int dimension);
 void bundle_binary(uint64_t *result_vector, uint64_t **vectors, int count, int dimension);

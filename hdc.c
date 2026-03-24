@@ -149,6 +149,7 @@ void bundle(float *result, float **vectors, int count, int dimension)
     zero_vector(result, dimension);
     for (int i = 0; i < count; i++)
     {
+        if (vectors[i] == NULL) continue;
         for (int j = 0; j < dimension; j++)
         {
             result[j] += vectors[i][j];
@@ -182,8 +183,8 @@ void similize(float *similar_vector, float *vectora, float *vectorb, int dimensi
     if (check_null(args, 3, "similize")) return;
     if (check_dimension(dimension)) return;
 
-    float vectora_copy[dimension];
-    float vectorb_copy[dimension];
+    static float vectora_copy[HDC_MAX_DIMENSION];
+    static float vectorb_copy[HDC_MAX_DIMENSION];
     copy_vector(vectora_copy, vectora, dimension);
     copy_vector(vectorb_copy, vectorb, dimension);
 
@@ -222,7 +223,7 @@ void level_encode(float value, float *result, int dimension)
     if (check_null(args, 1, "level_encode")) return;
     if(check_dimension(dimension)) return;
     if(!flip_order_initialized){
-        printf("WARNING: flip_order not initialized!");
+        printf("WARNING: flip_order not initialized!"); return;
     };
 
 
@@ -245,8 +246,8 @@ void id_level_encode(float *values, float **id_vectors, int channel_amount, floa
     if (check_null(args, 3, "id_level_encode")) return;
     if(check_dimension(dimension)) return;
     if (channel_amount <= 0) return;
-    float temp_vector[dimension];
-    float temp_vector2[dimension];
+    static float temp_vector[HDC_MAX_DIMENSION];
+    static float temp_vector2[HDC_MAX_DIMENSION];
     zero_vector(result_vector, dimension);
     for (int i = 0; i < channel_amount; i++)
     {
@@ -269,8 +270,8 @@ void ngram(float **vectors, int symbol_count, int window_size, float *result_vec
 
 
     zero_vector(result_vector, dimension);
-    float window_accumulator[dimension];
-    float perm_vector[dimension];
+    static float window_accumulator[HDC_MAX_DIMENSION];
+    static float perm_vector[HDC_MAX_DIMENSION];
 
     for (int i = 0; i <= (symbol_count - window_size); i++)
     {
@@ -342,14 +343,10 @@ int classify(struct hdc_classifier *clf, float *new_vector)
     float startfloat = -2.0f;
     int bestclass = -1;
     float current_similarity_score;
-    float proto_copy[clf->dimension];
-    float new_vector_copy[clf->dimension];
 
     for (int i = 0; i < clf->class_count; i++)
     {
-        copy_vector(proto_copy, clf->vector[i], clf->dimension);
-        copy_vector(new_vector_copy, new_vector, clf->dimension);
-        similize(&current_similarity_score, proto_copy, new_vector_copy, clf->dimension);
+        similize(&current_similarity_score, clf->vector[i], new_vector, clf->dimension);
 
         if (current_similarity_score > startfloat)
         {
@@ -361,6 +358,9 @@ int classify(struct hdc_classifier *clf, float *new_vector)
 }
 
 void vector_to_complex(float *vector, struct complex_number *output, int dimension){
+    const void *args[] = {vector, output};
+    if (check_null(args, 2, "vector_to_complex")) return;
+    if (check_dimension(dimension)) return;
     for (int i = 0; i < dimension; i++){
         output[i].real = vector[i];
         output[i].imag = 0.0f;
@@ -378,9 +378,15 @@ int bit_reverse(int index, int num_bits){
 }
 
 void circular_convolve(float *result, float *vectora, float *vectorb, int dimension){
-    struct complex_number inputa[dimension];
-    struct complex_number inputb[dimension];
-    struct complex_number result_cmplx[dimension];
+    const void *args[] = {result, vectora, vectorb};
+    if (check_null(args, 3, "circular_convolve")) return;
+    if (check_dimension(dimension)) return;
+    if ((dimension & (dimension - 1)) != 0){
+        printf("WARNING: circular_convolve requires power-of-2 dimension, got %d\n", dimension); return;
+    }
+    static struct complex_number inputa[HDC_MAX_DIMENSION];
+    static struct complex_number inputb[HDC_MAX_DIMENSION];
+    static struct complex_number result_cmplx[HDC_MAX_DIMENSION];
 
     vector_to_complex(vectora, inputa, dimension);
     vector_to_complex(vectorb, inputb, dimension);
@@ -401,6 +407,11 @@ void circular_convolve(float *result, float *vectora, float *vectorb, int dimens
 }
 
 void inverse_fft(struct complex_number *cmplx, int dimension){
+    const void *args[] = {cmplx};
+    if (check_null(args, 1, "inverse_fft")) return;
+    if ((dimension & (dimension - 1)) != 0){
+        printf("WARNING: inverse_fft requires power-of-2 dimension, got %d\n", dimension); return;
+    }
     for (int size = 2; size <= dimension; size *= 2){
         for (int i = 0; i < dimension; i += size){
             for (int j = 0; j < size /2; j++){
@@ -428,6 +439,11 @@ void inverse_fft(struct complex_number *cmplx, int dimension){
 }
 
 void fft(struct complex_number *cmplx, int dimension){
+    const void *args[] = {cmplx};
+    if (check_null(args, 1, "fft")) return;
+    if ((dimension & (dimension - 1)) != 0){
+        printf("WARNING: fft requires power-of-2 dimension, got %d\n", dimension); return;
+    }
     for (int size = 2; size <= dimension; size *= 2){
         for (int i = 0; i < dimension; i += size){
             for (int j = 0; j < size /2; j++){
@@ -451,6 +467,9 @@ void fft(struct complex_number *cmplx, int dimension){
 }
 
 void rearrange_complex(struct complex_number *cmplx, int dimension ){
+    const void *args[] = {cmplx};
+    if (check_null(args, 1, "rearrange_complex")) return;
+    if (check_dimension(dimension)) return;
     int num_bits = 0;
     int temp = dimension;
     while (temp > 1){
@@ -468,6 +487,9 @@ void rearrange_complex(struct complex_number *cmplx, int dimension ){
 }
 
 void complex_to_vector(float *output_vector, struct complex_number *input, int dimension){
+    const void *args[] = {output_vector, input};
+    if (check_null(args, 2, "complex_to_vector")) return;
+    if (check_dimension(dimension)) return;
     for (int i = 0; i < dimension; i++){
         output_vector[i] = input[i].real;
     }
