@@ -11,6 +11,8 @@ static int flip_order[HDC_MAX_DIMENSION];
 /* flip order_init checker - */
 static int flip_order_initialized = 0;
 
+static float level_anchors[NUM_ANCHORS][HDC_MAX_DIMENSION];
+
 /* ── helpers ───────────────────────────────────────────────────── */
 
 /* NULL checker - returns 1 if any pointer in the array is NULL */
@@ -83,6 +85,9 @@ void hdc_init(unsigned int seed){
         flip_order[i] = i;
     }
     shuffle(flip_order, HDC_MAX_DIMENSION);
+    for (int a = 0; a < NUM_ANCHORS; a++){
+        random_bipolar(level_anchors[a], HDC_MAX_DIMENSION);
+    }
     flip_order_initialized =1;
 }
 
@@ -226,15 +231,21 @@ void level_encode(float value, float *result, int dimension)
         printf("WARNING: flip_order not initialized!"); return;
     };
 
-
-    neg_vector(result, dimension);
     if ( value < 0){ value = 0;}
     else if (value > 1){value = 1;}
-    int flip_amt = value * dimension;
 
-    for (int i = 0; i < flip_amt; i++)
-    {
-        result[flip_order[i] % dimension] = 1.0f;
+    int lower = (int)(value * (NUM_ANCHORS -1));
+    int upper = lower + 1;
+
+    if (upper >= NUM_ANCHORS) upper = NUM_ANCHORS -1;
+
+
+    float t = value *( NUM_ANCHORS -1) -lower;
+
+
+    for (int o=0; o < dimension; o++){
+        if (t > flip_order[o] % 100/100.0f) result[o] = level_anchors[upper][o];
+        else result[o] = level_anchors[lower][o];
     }
 }
 

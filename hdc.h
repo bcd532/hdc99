@@ -11,6 +11,7 @@
 
 #define HDC_VERSION        "0.3.2"
 #define HDC_MAX_DIMENSION  10048
+#define NUM_ANCHORS     6
 #define MAX_CLASSES        128
 
 /* ── classifier ────────────────────────────────────────────────────
