@@ -22,7 +22,7 @@ benchmarked on UCI datasets:
 | ionosphere | 34 | 2 | **90.3%** avg (200 seeds) | beats raw kNN by 6% |
 | iris | 4 | 3 | **96.7%** avg | matches SVM |
 
-- matches torchhd accuracy, runs **16x faster**
+- matches torchhd accuracy, runs **1.7x faster**
 - **25,000x lighter** (15KB vs 500MB+)
 - works at 64 dimensions just as well as 4096
 - first known HDC implementation tested on quantum hardware (IonQ)
